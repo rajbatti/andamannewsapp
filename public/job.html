@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Submission Data</title>
+</head>
+<body>
+  <h1>Upload Submission Details</h1>
+  <form id="uploadForm">
+    <label for="department">Department:</label>
+    <input type="text" id="department" name="department" required><br><br>
+
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" name="subject" required><br><br>
+
+    <label for="lastDate">Last Date of Submission:</label>
+    <input type="date" id="lastDate" name="lastDate" required><br><br>
+
+    <label for="uploadDate">Upload Date:</label>
+    <input type="date" id="uploadDate" name="uploadDate" required><br><br>
+
+    <label for="downloadLink">Download Link:</label>
+    <input type="url" id="downloadLink" name="downloadLink" required><br><br>
+
+    <button type="submit">Upload</button>
+  </form>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const department = document.getElementById('department').value;
+      const subject = document.getElementById('subject').value;
+      const lastDate = document.getElementById('lastDate').value;
+      const uploadDate = document.getElementById('uploadDate').value;
+      const downloadLink = document.getElementById('downloadLink').value;
+
+      const response = await fetch('/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ department, subject, lastDate, uploadDate, downloadLink }),
+      });
+
+      if (response.ok) {
+        alert('Data uploaded successfully!');
+      } else {
+        alert('Error uploading data.');
+      }
+    });
+  </script>
+</body>
+</html>
