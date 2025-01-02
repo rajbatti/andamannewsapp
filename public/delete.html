@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Media Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .media-item {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .filters select, .filters input {
+            width: 48%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar" style="background-color: #333; overflow: hidden;">
+        <a href="index.html" style="float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none;" class="active">Level 1</a>
+        <a href="version2.html" style="float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none;">Level 2</a>
+        <a href="version3.html" style="float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none;">Level 3</a>
+        <a href="delete.html" style="float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none;">Delete News</a>
+    </div>
+<div class="container">
+    <h2 style="text-align: center; font-weight: bold; font-size: 40px;">Delete News</h2>
+    <div class="filters">
+        <select id="filterCategory">
+            <option value="">All Categories</option>
+            <option value="Local">Local</option>
+            <option value="National">National</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Sports">Sports</option>
+            <option value="Technology">Technology</option>
+        </select>
+        <input type="date" id="filterDate" placeholder="Filter by Date">
+    </div>
+    <h2>Uploaded Media</h2>
+    <div id="mediaList"></div>
+</div>
+
+<script>
+    const mediaList = document.getElementById('mediaList');
+    const filterCategory = document.getElementById('filterCategory');
+    const filterDate = document.getElementById('filterDate');
+
+    // Load Media List
+async function loadMedia() {
+    mediaList.innerHTML = 'Loading...';
+    const category = filterCategory.value;
+    const date = filterDate.value;
+    try {
+        // Include version=3 query parameter
+        const response = await fetch(`/get/media?category=${category}&date=${date}&version=3`);
+        const media = await response.json();
+        media.sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by ascending date
+        mediaList.innerHTML = '';
+        media.forEach(item => {
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'media-item';
+            mediaItem.innerHTML = `
+                <img src="${item.url}" alt="Media Image" style="width:100%; max-height:300px; object-fit:cover;">
+                <p><strong>Short Description (English):</strong> ${item.short_description}</p>
+                <p><strong>Short Description (Hindi):</strong> ${item.short_description_hindi}</p>
+                <p><strong>Short Description (Roman):</strong> ${item.short_description_roman}</p>
+                <p><strong>Category:</strong> ${item.category}</p>
+                <p><strong>Trending:</strong> ${item.trending}</p>
+                <button class="delete-button" data-id="${item.id}" data-type="${item.type}">Delete</button>
+            `;
+            mediaList.appendChild(mediaItem);
+        });
+
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const id = button.getAttribute('data-id');
+                const type = button.getAttribute('data-type');
+                await deleteMedia(id, type);
+                loadMedia();
+            });
+        });
+    } catch (error) {
+        console.error('Error loading media:', error);
+    }
+}
+
+    async function deleteMedia(id, type) {
+        const endpoint = `/delete/image/${id}`;
+        try {
+            const response = await fetch(endpoint, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            alert(result.message);
+        } catch (error) {
+            console.error('Error deleting media:', error);
+        }
+    }
+
+    // Filter Media
+    filterCategory.addEventListener('change', loadMedia);
+    filterDate.addEventListener('change', loadMedia);
+
+    // Initial Load
+    loadMedia();
+</script>
+
+</body>
+</html>
